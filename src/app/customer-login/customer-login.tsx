@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaUser, FaEnvelope, FaLock, FaPhone, FaMapMarkerAlt, FaCamera } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaPhone, FaCamera } from 'react-icons/fa';
+import Image from 'next/image';
 
 export default function CustomerLogin() {
   const router = useRouter();
@@ -113,7 +114,13 @@ export default function CustomerLogin() {
                   <div className="relative inline-block">
                     <div className="w-32 h-32 rounded-full border-2 border-gray-300 flex items-center justify-center overflow-hidden">
                       {photoPreview ? (
-                        <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                        <Image 
+                          src={photoPreview}
+                          alt="Preview"
+                          width={128}
+                          height={128}
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
                         <FaCamera className="h-12 w-12 text-gray-400" />
                       )}

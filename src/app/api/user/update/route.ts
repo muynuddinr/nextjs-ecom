@@ -43,7 +43,8 @@ export async function PUT(request: Request) {
       }
     });
 
-  } catch (error: any) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 } 

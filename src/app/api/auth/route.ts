@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import { APIError } from '@/types/api';
 
 export async function POST(request: Request) {
   try {
@@ -52,7 +53,10 @@ export async function POST(request: Request) {
       });
     }
 
-  } catch (error: any) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  } catch (error) {
+    if (error instanceof APIError) {
+      return NextResponse.json({ success: false, message: error.message }, { status: error.status });
+    }
+    return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
   }
 } 

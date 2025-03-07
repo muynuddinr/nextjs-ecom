@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaEdit, FaCamera } from 'react-icons/fa';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
+import Image from 'next/image';
 
 interface Address {
   street: string;
@@ -150,10 +151,22 @@ export default function ProfilePage() {
             <div className="relative">
               <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
                 {(isEditing && photoPreview) ? (
-                  <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                  <Image 
+                    src={photoPreview}
+                    alt="Preview"
+                    width={128}
+                    height={128}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   userData.photo ? (
-                    <img src={userData.photo} alt={userData.fullName} className="w-full h-full object-cover" />
+                    <Image 
+                      src={userData.photo}
+                      alt={userData.fullName}
+                      width={128}
+                      height={128}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <FaUser className="w-16 h-16 text-gray-400" />
                   )

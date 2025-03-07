@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { FaShoppingCart, FaUser, FaSearch, FaBars, FaSignOutAlt } from 'react-icons/fa';
+import Image from 'next/image';
 
 interface User {
   fullName: string;
@@ -92,9 +93,11 @@ const Navbar = () => {
               >
                 <div className="w-10 h-10 rounded-full overflow-hidden">
                   {user?.photo ? (
-                    <img 
+                    <Image 
                       src={user.photo} 
                       alt={user.fullName}
+                      width={40}
+                      height={40}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -115,17 +118,13 @@ const Navbar = () => {
                         className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-300"
                       >
                         <div className="w-12 h-12 rounded-full overflow-hidden mr-3">
-                          {user.photo ? (
-                            <img 
-                              src={user.photo} 
-                              alt={user.fullName}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-blue-100 flex items-center justify-center">
-                              <FaUser className="h-5 w-5 text-blue-600" />
-                            </div>
-                          )}
+                          <Image 
+                            src={user.photo} 
+                            alt={user.fullName}
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                         <div>
                           <p className="font-medium">{user.fullName}</p>

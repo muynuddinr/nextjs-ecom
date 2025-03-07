@@ -28,7 +28,8 @@ export async function POST(request: Request) {
       success: true,
       filePath: `/uploads/${uniqueFilename}`
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    console.error('File upload error:', error);
     return NextResponse.json({ error: 'Error uploading file' }, { status: 500 });
   }
 } 
