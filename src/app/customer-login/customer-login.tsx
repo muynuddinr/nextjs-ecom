@@ -46,19 +46,19 @@ export default function CustomerLogin() {
       };
       reader.readAsDataURL(file);
 
-      // Upload file
+      // Upload to Cloudinary
       const formData = new FormData();
       formData.append('file', file);
 
       try {
-        const response = await fetch('/api/upload', {
+        const response = await fetch('/api/cloudinary', {
           method: 'POST',
           body: formData
         });
         const data = await response.json();
         
         if (data.success) {
-          setFormData(prev => ({ ...prev, photo: data.filePath }));
+          setFormData(prev => ({ ...prev, photo: data.url }));
         }
       } catch (error) {
         console.error('Error uploading file:', error);

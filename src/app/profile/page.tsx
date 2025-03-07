@@ -15,6 +15,7 @@ interface Address {
 }
 
 interface UserData {
+  id: string;
   fullName: string;
   email: string;
   phone: string;
@@ -58,6 +59,20 @@ export default function ProfilePage() {
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size must be less than 10MB');
+        return;
+      }
+
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp'];
+      if (!validTypes.includes(file.type)) {
+        alert('Please upload an image file (JPEG, PNG, GIF, WEBP, SVG, or BMP)');
+        return;
+      }
+
+      // Show preview immediately
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhotoPreview(reader.result as string);
@@ -68,42 +83,76 @@ export default function ProfilePage() {
       formData.append('file', file);
 
       try {
-        const response = await fetch('/api/upload', {
+        const response = await fetch('/api/cloudinary', {
           method: 'POST',
           body: formData
         });
         const data = await response.json();
         
         if (data.success) {
-          setEditedData(prev => ({ ...prev!, photo: data.filePath }));
+          setEditedData(prev => {
+            const updated = { ...prev!, photo: data.url };
+            // Save immediately to ensure the update persists
+            localStorage.setItem('user', JSON.stringify(updated));
+            return updated;
+          });
+        } else {
+          console.error('Upload failed:', data.error);
+          alert(data.error?.details || 'Failed to upload image');
+          setPhotoPreview(null);
         }
       } catch (error) {
         console.error('Error uploading file:', error);
+        alert('Error uploading image. Please try again.');
+        setPhotoPreview(null);
       }
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSave = async () => {
+    if (!editedData) return;
+
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/customer-login');
+        return;
+      }
+
+      console.log('Sending update data:', editedData); // Debug log
+
       const response = await fetch('/api/user/update', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(editedData)
       });
 
       const data = await response.json();
+      console.log('Update response:', data); // Debug log
+
       if (data.success) {
-        setUserData(editedData);
-        localStorage.setItem('user', JSON.stringify(editedData));
+        // Update local storage with new user data
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setUserData(data.user);
         setIsEditing(false);
+        setPhotoPreview(null);
+        // Force a page refresh to update the navbar
+        window.location.reload();
+      } else {
+        console.error('Failed to update profile:', data.message);
+        alert(data.message || 'Failed to update profile');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
+      alert('An error occurred while updating the profile');
     }
   };
+
+  // Add this to display the profile image
+  const profileImage = photoPreview || editedData?.photo || '/default-avatar.png';
 
   if (!userData || !editedData) {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
@@ -113,31 +162,30 @@ export default function ProfilePage() {
     <>
       <Navbar />
       <div className="max-w-4xl mx-auto p-6">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">My Profile</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">My Profile</h1>
           {!isEditing ? (
-            <button 
+            <button
               onClick={() => setIsEditing(true)}
-              className="flex items-center space-x-2 text-blue-600 hover:text-blue-700"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
             >
-              <FaEdit className="w-5 h-5" />
-              <span>Edit Profile</span>
+              Edit Profile
             </button>
           ) : (
-            <div className="space-x-4">
-              <button 
-                onClick={handleSubmit}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            <div className="space-x-2">
+              <button
+                onClick={handleSave}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
               >
-                Save Changes
+                Save
               </button>
-              <button 
+              <button
                 onClick={() => {
                   setIsEditing(false);
                   setEditedData(userData);
                   setPhotoPreview(null);
                 }}
-                className="text-gray-600 hover:text-gray-700"
+                className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
               >
                 Cancel
               </button>
@@ -145,59 +193,31 @@ export default function ProfilePage() {
           )}
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          {/* Profile Photo */}
-          <div className="flex items-center space-x-6 mb-8 pb-6 border-b">
-            <div className="relative">
-              <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                {(isEditing && photoPreview) ? (
-                  <Image 
-                    src={photoPreview}
-                    alt="Preview"
-                    width={128}
-                    height={128}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  userData.photo ? (
-                    <Image 
-                      src={userData.photo}
-                      alt={userData.fullName}
-                      width={128}
-                      height={128}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <FaUser className="w-16 h-16 text-gray-400" />
-                  )
-                )}
-              </div>
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex flex-col items-center mb-6">
+            <div className="relative w-32 h-32 mb-4">
+              <Image
+                src={profileImage}
+                alt="Profile"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                priority
+                className="rounded-full object-cover"
+              />
               {isEditing && (
-                <label className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-2 cursor-pointer">
-                  <FaCamera className="w-4 h-4 text-white" />
+                <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700">
+                  <FaCamera />
                   <input
                     type="file"
+                    className="hidden"
                     accept="image/*"
                     onChange={handlePhotoChange}
-                    className="hidden"
                   />
                 </label>
               )}
             </div>
-            <div>
-              {isEditing ? (
-                <input
-                  type="text"
-                  name="fullName"
-                  value={editedData.fullName}
-                  onChange={handleInputChange}
-                  className="text-2xl font-semibold border rounded px-2 py-1"
-                />
-              ) : (
-                <h2 className="text-2xl font-semibold">{userData.fullName}</h2>
-              )}
-              <p className="text-gray-600">{userData.role}</p>
-            </div>
+            <h2 className="text-2xl font-semibold">{editedData?.fullName}</h2>
+            <p className="text-gray-600">{editedData?.email}</p>
           </div>
 
           {/* Contact Information */}

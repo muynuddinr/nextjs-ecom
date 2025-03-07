@@ -19,16 +19,28 @@ export async function PUT(request: Request) {
     // Get update data
     const updateData = await request.json();
     
+    console.log('Received update data:', updateData); // Debug log
+
     // Update user
     const user = await User.findByIdAndUpdate(
       decoded.userId,
-      { $set: updateData },
+      { 
+        $set: {
+          fullName: updateData.fullName,
+          phone: updateData.phone,
+          address: updateData.address,
+          photo: updateData.photo,
+          email: updateData.email // Add this if you want to allow email updates
+        }
+      },
       { new: true, runValidators: true }
-    );
+    ).select('-password'); // Exclude password from response
 
     if (!user) {
       return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
     }
+
+    console.log('Updated user:', user); // Debug log
 
     return NextResponse.json({
       success: true,
@@ -44,6 +56,7 @@ export async function PUT(request: Request) {
     });
 
   } catch (error: unknown) {
+    console.error('Update error:', error); // Debug log
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
     return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
