@@ -1,12 +1,18 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { FaShoppingCart, FaUser, FaSearch, FaBars } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaSearch, FaBars, FaSignOutAlt } from 'react-icons/fa';
+
+interface User {
+  fullName: string;
+  photo: string;
+}
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   // Add click outside handler
   useEffect(() => {
@@ -20,6 +26,13 @@ const Navbar = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
+  }, []);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
   }, []);
 
   return (
@@ -74,61 +87,109 @@ const Navbar = () => {
             </Link>
             <div className="relative" ref={accountMenuRef}>
               <button
-                className="text-gray-700 hover:text-blue-600 transition duration-300"
+                className="flex items-center space-x-2"
                 onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
               >
-                <FaUser className="h-6 w-6" />
+                <div className="w-10 h-10 rounded-full overflow-hidden">
+                  {user?.photo ? (
+                    <img 
+                      src={user.photo} 
+                      alt={user.fullName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <FaUser className="w-5 h-5 text-gray-500" />
+                    </div>
+                  )}
+                </div>
               </button>
               
               {/* Enhanced Account Mega Menu */}
               {isAccountMenuOpen && (
-                <div className="absolute right-0 mt-4 w-72 bg-white rounded-xl shadow-2xl py-4 z-50 border border-gray-100
-                              transform transition-all duration-300 ease-in-out">
-                  <div className="px-4 py-3 border-b border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-800">Account Access</h3>
-                    <p className="text-sm text-gray-500">Select your login portal</p>
-                  </div>
-                  <div className="py-2">
-                    <Link
-                      href="/customer-login"
-                      className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 
-                                transition duration-300 group"
-                    >
-                      <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 mr-3">
-                        <FaUser className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Customer Login</p>
-                        <p className="text-sm text-gray-500">Shop and manage your orders</p>
-                      </div>
-                    </Link>
-                    <Link
-                      href="/seller-login"
-                      className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 
-                                transition duration-300 group"
-                    >
-                      <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 mr-3">
-                        <FaUser className="h-5 w-5 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Seller Portal</p>
-                        <p className="text-sm text-gray-500">Manage your store</p>
-                      </div>
-                    </Link>
-                    <Link
-                      href="/reseller-login"
-                      className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 
-                                transition duration-300 group"
-                    >
-                      <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 mr-3">
-                        <FaUser className="h-5 w-5 text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Reseller Portal</p>
-                        <p className="text-sm text-gray-500">Access wholesale options</p>
-                      </div>
-                    </Link>
-                  </div>
+                <div className="absolute right-0 mt-4 w-72 bg-white rounded-xl shadow-2xl py-4 z-50 border border-gray-100">
+                  {user ? (
+                    <div className="py-2">
+                      <Link
+                        href="/profile"
+                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-300"
+                      >
+                        <div className="w-12 h-12 rounded-full overflow-hidden mr-3">
+                          {user.photo ? (
+                            <img 
+                              src={user.photo} 
+                              alt={user.fullName}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-blue-100 flex items-center justify-center">
+                              <FaUser className="h-5 w-5 text-blue-600" />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium">{user.fullName}</p>
+                          <p className="text-sm text-gray-500">View Profile</p>
+                        </div>
+                      </Link>
+                      <button
+                        onClick={() => {
+                          localStorage.removeItem('user');
+                          localStorage.removeItem('token');
+                          setUser(null);
+                          setIsAccountMenuOpen(false);
+                        }}
+                        className="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-300"
+                      >
+                        <div className="p-2 bg-red-100 rounded-lg mr-3">
+                          <FaSignOutAlt className="h-5 w-5 text-red-600" />
+                        </div>
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="py-2">
+                      <Link
+                        href="/customer-login"
+                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 
+                                  transition duration-300 group"
+                      >
+                        <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 mr-3">
+                          <FaUser className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Customer Login</p>
+                          <p className="text-sm text-gray-500">Shop and manage your orders</p>
+                        </div>
+                      </Link>
+                      <Link
+                        href="/seller-login"
+                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 
+                                  transition duration-300 group"
+                      >
+                        <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 mr-3">
+                          <FaUser className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Seller Portal</p>
+                          <p className="text-sm text-gray-500">Manage your store</p>
+                        </div>
+                      </Link>
+                      <Link
+                        href="/reseller-login"
+                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 
+                                  transition duration-300 group"
+                      >
+                        <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 mr-3">
+                          <FaUser className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Reseller Portal</p>
+                          <p className="text-sm text-gray-500">Access wholesale options</p>
+                        </div>
+                      </Link>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
