@@ -58,54 +58,75 @@ export default function ProfilePage() {
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // Validate file size (10MB limit)
-      if (file.size > 10 * 1024 * 1024) {
-        alert('File size must be less than 10MB');
-        return;
+    if (!file) return;
+
+    // Show preview immediately
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPhotoPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Add the old image URL if it exists
+    if (editedData?.photo) {
+      formData.append('oldImageUrl', editedData.photo);
+    }
+
+    try {
+      const uploadResponse = await fetch('/api/cloudinary', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error(`Upload failed: ${uploadResponse.status}`);
       }
 
-      // Validate file type
-      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp'];
-      if (!validTypes.includes(file.type)) {
-        alert('Please upload an image file (JPEG, PNG, GIF, WEBP, SVG, or BMP)');
-        return;
-      }
-
-      // Show preview immediately
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-
-      const formData = new FormData();
-      formData.append('file', file);
-
-      try {
-        const response = await fetch('/api/cloudinary', {
-          method: 'POST',
-          body: formData
+      const uploadData = await uploadResponse.json();
+      
+      if (uploadData.success) {
+        // Update user data with new photo URL
+        const token = localStorage.getItem('token');
+        const updateResponse = await fetch('/api/user/update', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            ...editedData,
+            photo: uploadData.url
+          })
         });
-        const data = await response.json();
-        
-        if (data.success) {
-          setEditedData(prev => {
-            const updated = { ...prev!, photo: data.url };
-            // Save immediately to ensure the update persists
-            localStorage.setItem('user', JSON.stringify(updated));
-            return updated;
-          });
-        } else {
-          console.error('Upload failed:', data.error);
-          alert(data.error?.details || 'Failed to upload image');
-          setPhotoPreview(null);
+
+        if (!updateResponse.ok) {
+          throw new Error(`Profile update failed: ${updateResponse.status}`);
         }
-      } catch (error) {
-        console.error('Error uploading file:', error);
-        alert('Error uploading image. Please try again.');
-        setPhotoPreview(null);
+
+        const updateData = await updateResponse.json();
+        
+        if (updateData.success) {
+          setEditedData(prev => ({
+            ...prev!,
+            photo: uploadData.url
+          }));
+          localStorage.setItem('user', JSON.stringify({
+            ...editedData,
+            photo: uploadData.url
+          }));
+        } else {
+          throw new Error(updateData.message || 'Failed to update profile');
+        }
+      } else {
+        throw new Error(uploadData.error || 'Failed to upload image');
       }
+    } catch (error) {
+      console.error('Error:', error);
+      setPhotoPreview(null);
+      alert(error instanceof Error ? error.message : 'Failed to update profile picture. Please try again.');
     }
   };
 
