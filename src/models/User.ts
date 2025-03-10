@@ -31,6 +31,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'customer',
   },
+  isActive: {
+    type: Boolean,
+    default: true
+  }
 }, {
   timestamps: true,
 });
