@@ -49,14 +49,28 @@ export default function ResellerLogin() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
+    const keys = name.split('.');
+    
+    if (keys.length === 1) {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    } else if (keys.length === 2) {
+      const [parent, child] = keys;
       setFormData(prev => ({
         ...prev,
         [parent]: { ...(prev[parent as keyof typeof prev] as object), [child]: value }
       }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+    } else if (keys.length === 3) {
+      const [parent, child, grandChild] = keys;
+      setFormData(prev => ({
+        ...prev,
+        [parent]: {
+          ...(prev[parent as keyof typeof prev] as object),
+          [child]: {
+            ...((prev[parent as keyof typeof prev] as any)[child]),
+            [grandChild]: value
+          }
+        }
+      }));
     }
   };
 
@@ -91,17 +105,37 @@ export default function ResellerLogin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Ensure all nested objects are properly structured
+      const formDataToSubmit = {
+        ...formData,
+        storeDetails: {
+          ...formData.storeDetails,
+          storeAddress: {
+            street: formData.storeDetails.storeAddress.street || '',
+            landmark: formData.storeDetails.storeAddress.landmark || '',
+            city: formData.storeDetails.storeAddress.city || '',
+            state: formData.storeDetails.storeAddress.state || '',
+            pinCode: formData.storeDetails.storeAddress.pinCode || ''
+          }
+        }
+      };
+
+      console.log('Submitting form data:', {
+        action: isLogin ? 'login' : 'signup',
+        ...formDataToSubmit
+      });
+
       const response = await fetch('/api/auth/reseller', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: isLogin ? 'login' : 'signup',
-          ...formData,
-          role: 'reseller'
+          ...formDataToSubmit
         }),
       });
 
       const data = await response.json();
+      console.log('Server response:', data);
 
       if (data.success) {
         localStorage.setItem('token', data.token);
@@ -111,8 +145,8 @@ export default function ResellerLogin() {
         alert(data.message || 'An error occurred');
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('An error occurred');
+      console.error('Error during form submission:', error);
+      alert('An error occurred while processing your request');
     }
   };
 
