@@ -1,63 +1,71 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
+import Seller from '@/models/Seller';
+import Reseller from '@/models/Reseller';
 import jwt from 'jsonwebtoken';
 
 export async function PUT(request: Request) {
   try {
     await connectDB();
-    
-    // Get token from header
-    const token = request.headers.get('authorization')?.split(' ')[1];
-    if (!token) {
+
+    // Get the authorization header
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json({ success: false, message: 'No token provided' }, { status: 401 });
     }
 
-    // Verify token
+    // Verify the token
+    const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-    
-    // Get update data
-    const updateData = await request.json();
-    
-    console.log('Received update data:', updateData); // Debug log
 
-    // Update user
-    const user = await User.findByIdAndUpdate(
-      decoded.userId,
-      { 
-        $set: {
-          fullName: updateData.fullName,
-          phone: updateData.phone,
-          address: updateData.address,
-          photo: updateData.photo,
-          email: updateData.email // Add this if you want to allow email updates
-        }
-      },
-      { new: true, runValidators: true }
-    ).select('-password'); // Exclude password from response
+    // Get the updated user data
+    const userData = await request.json();
+
+    // Find the user in all possible collections
+    let user = await User.findById(decoded.userId);
+    let model = User;
+
+    if (!user) {
+      user = await Seller.findById(decoded.userId);
+      model = Seller;
+    }
+
+    if (!user) {
+      user = await Reseller.findById(decoded.userId);
+      model = Reseller;
+    }
 
     if (!user) {
       return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
     }
 
-    console.log('Updated user:', user); // Debug log
+    // Update the user
+    const updatedUser = await model.findByIdAndUpdate(
+      decoded.userId,
+      { $set: userData },
+      { new: true, runValidators: true }
+    );
 
     return NextResponse.json({
       success: true,
       user: {
-        id: user._id,
-        email: user.email,
-        fullName: user.fullName,
-        phone: user.phone,
-        address: user.address,
-        photo: user.photo,
-        role: user.role
+        id: updatedUser._id,
+        email: updatedUser.email,
+        fullName: updatedUser.fullName || updatedUser.businessName,
+        phone: updatedUser.phone,
+        address: updatedUser.address,
+        photo: updatedUser.photo,
+        role: updatedUser.role,
+        storeDetails: updatedUser.storeDetails
       }
     });
 
-  } catch (error: unknown) {
-    console.error('Update error:', error); // Debug log
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
+  } catch (error) {
+    console.error('Error in update route:', error);
+    return NextResponse.json({ 
+      success: false, 
+      message: error instanceof Error ? error.message : 'Internal server error' 
+    }, { status: 500 });
   }
 } 

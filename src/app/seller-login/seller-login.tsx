@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   FaStore, FaEnvelope, FaLock, FaCamera, FaMapMarkerAlt, FaBuilding, 
-  FaCreditCard, FaIdCard 
+  FaCreditCard, FaIdCard, FaPhone 
 } from 'react-icons/fa';
 import Image from 'next/image';
 
@@ -24,6 +24,12 @@ export default function SellerLogin() {
       pinCode: '',
     },
     photo: '',
+    storeDetails: {
+      description: '',
+      category: '',
+      openingTime: '',
+      closingTime: '',
+    },
     gstNumber: '',
     panNumber: '',
     bankDetails: {
@@ -94,6 +100,7 @@ export default function SellerLogin() {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         router.push('/seller/dashboard');
+        window.location.reload();
       } else {
         alert(data.message || 'An error occurred');
       }
@@ -128,7 +135,7 @@ export default function SellerLogin() {
                       {photoPreview ? (
                         <Image 
                           src={photoPreview}
-                          alt="Store Preview"
+                          alt={`${formData.businessName || 'Business'} Logo Preview`}
                           width={160}
                           height={160}
                           className="w-full h-full object-cover"
@@ -145,6 +152,7 @@ export default function SellerLogin() {
                       accept="image/*"
                       onChange={handlePhotoChange}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      aria-label="Upload business logo"
                     />
                     <div className="absolute -bottom-2 right-0 bg-blue-600 rounded-full p-2.5 shadow-lg cursor-pointer hover:bg-blue-700 transition-colors">
                       <FaCamera className="h-4 w-4 text-white" />
@@ -396,6 +404,24 @@ export default function SellerLogin() {
                     type="password"
                     name="password"
                     required
+                    className="pl-10 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                <div className="mt-1 relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
+                    <FaPhone className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="tel"
+                    name="phone"
+                    required
+                    pattern="[0-9]{10}"
+                    placeholder="10-digit phone number"
                     className="pl-10 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     onChange={handleInputChange}
                   />
