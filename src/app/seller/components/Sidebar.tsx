@@ -1,6 +1,7 @@
 'use client'
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   FaThLarge, FaUser, FaShoppingBag,
   FaListAlt, FaShoppingCart, FaTruck,
@@ -9,6 +10,23 @@ import {
 
 const Sidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const [storeName, setStoreName] = useState('');
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      setStoreName(user.businessName || 'My Store');
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('storeName');
+    router.push('/seller-login');
+  };
 
   const navItems = [
     { name: 'Dashboard', icon: FaThLarge, path: '/seller/dashboard' },
@@ -22,7 +40,8 @@ const Sidebar = () => {
   return (
     <div className="w-64 bg-white h-full shadow-lg">
       <div className="p-6">
-        <h1 className="text-2xl font-bold text-gray-800">Seller Panel</h1>
+        <h1 className="text-2xl font-bold text-gray-800">{storeName}</h1>
+        <p className="text-sm text-gray-600 mt-1">Seller Panel</p>
       </div>
       
       <nav className="mt-4">
@@ -39,7 +58,7 @@ const Sidebar = () => {
         ))}
         
         <button
-          onClick={() => {/* Add logout logic here */}}
+          onClick={handleLogout}
           className="flex items-center px-6 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 w-full"
         >
           <FaSignOutAlt className="w-5 h-5 mr-3" />

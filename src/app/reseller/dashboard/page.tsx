@@ -1,7 +1,27 @@
+'use client';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
 export default function ResellerDashboard() {
+  const router = useRouter();
+  const [storeName, setStoreName] = useState('');
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) {
+      router.push('/reseller-login');
+      return;
+    }
+
+    const user = JSON.parse(userStr);
+    setStoreName(user.storeDetails?.storeName || 'My Store');
+  }, [router]);
+
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-gray-800">Welcome to {storeName}</h1>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
