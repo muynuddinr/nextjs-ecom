@@ -10,7 +10,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold">ShopName</h3>
+            <h3 className="text-lg font-bold">Ecommerce</h3>
             <p className="text-gray-600 text-sm">
               Your one-stop destination for fashion and style.
             </p>
@@ -106,7 +106,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-200 mt-8 pt-8 text-center text-sm text-gray-600">
-          <p>© {new Date().getFullYear()} ShopName. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Ecommerce. All rights reserved.</p>
         </div>
       </div>
     </footer>

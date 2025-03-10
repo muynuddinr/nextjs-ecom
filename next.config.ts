@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
   images: {
     domains: [
       'localhost', 
-      'nextjs-ecom-delta.vercel.app', 
+      'nextjs-ecom-delta.vercel.app',
+      'images.unsplash.com',
       'res.cloudinary.com',
       `${process.env.CLOUDINARY_CLOUD_NAME}.cloudinary.com`
     ],

@@ -9,17 +9,17 @@ interface User {
   photo: string;
 }
 
+interface NavItem {
+  title: string;
+  path: string;
+}
+
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [navItems, setNavItems] = useState([
-    { title: 'Men', path: '/mens' },
-    { title: 'Women', path: '/womens' },
-    { title: 'Kids', path: '/kids' },
-    { title: 'New Arrivals', path: '/new-arrivals' }
-  ]);
+  const [navItems, setNavItems] = useState<NavItem[]>([]);
 
   // Add click outside handler
   useEffect(() => {
@@ -64,7 +64,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/" className="text-2xl font-bold text-gray-800 hover:text-blue-600 transition duration-300">
-              ShopName
+              Ecommerce
             </Link>
           </div>
 
