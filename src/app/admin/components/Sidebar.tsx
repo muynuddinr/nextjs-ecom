@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { 
   FaThLarge, FaUsers, FaStore, FaShoppingBag,
   FaListAlt, FaShoppingCart, FaTruck, FaBlog,
-  FaEnvelope, FaNewspaper, FaSignOutAlt
+  FaEnvelope, FaNewspaper, FaSignOutAlt, FaList
 } from 'react-icons/fa';
 
 const Sidebar = () => {
@@ -15,6 +15,7 @@ const Sidebar = () => {
     { name: 'Resellers', icon: FaUsers, path: '/admin/resellers' },
     { name: 'Sellers', icon: FaStore, path: '/admin/sellers' },
     { name: 'Customers', icon: FaUsers, path: '/admin/customers' },
+    { name: 'Navigation', icon: FaList, path: '/admin/navigation' },
     { name: 'Products', icon: FaShoppingBag, path: '/admin/products' },
     { name: 'Categories', icon: FaListAlt, path: '/admin/categories' },
     { name: 'Orders', icon: FaShoppingCart, path: '/admin/orders' },
@@ -22,6 +23,7 @@ const Sidebar = () => {
     { name: 'Blogs', icon: FaBlog, path: '/admin/blogs' },
     { name: 'Contact', icon: FaEnvelope, path: '/admin/contact' },
     { name: 'Newsletter', icon: FaNewspaper, path: '/admin/newsletter' },
+   
   ];
 
   return (

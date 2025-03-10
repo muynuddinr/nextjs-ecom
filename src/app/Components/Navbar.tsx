@@ -14,6 +14,12 @@ const Navbar = () => {
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [navItems, setNavItems] = useState([
+    { title: 'Men', path: '/mens' },
+    { title: 'Women', path: '/womens' },
+    { title: 'Kids', path: '/kids' },
+    { title: 'New Arrivals', path: '/new-arrivals' }
+  ]);
 
   // Add click outside handler
   useEffect(() => {
@@ -36,6 +42,21 @@ const Navbar = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const fetchNavItems = async () => {
+      try {
+        const res = await fetch('/api/admin/navigation');
+        const data = await res.json();
+        if (data.success) {
+          setNavItems(data.items);
+        }
+      } catch (error) {
+        console.error('Failed to fetch navigation items:', error);
+      }
+    };
+    fetchNavItems();
+  }, []);
+
   return (
     <nav className="bg-white text-gray-800 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,18 +70,15 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/mens" className="text-gray-700 hover:text-blue-600 hover:scale-105 transition duration-300 font-medium">
-              Men
-            </Link>
-            <Link href="/womens" className="text-gray-700 hover:text-blue-600 hover:scale-105 transition duration-300 font-medium">
-              Women
-            </Link>
-            <Link href="/kids" className="text-gray-700 hover:text-blue-600 hover:scale-105 transition duration-300 font-medium">
-              Kids
-            </Link>
-            <Link href="/new-arrivals" className="text-gray-700 hover:text-blue-600 hover:scale-105 transition duration-300 font-medium">
-              New Arrivals
-            </Link>
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                href={item.path}
+                className="text-gray-700 hover:text-blue-600 hover:scale-105 transition duration-300 font-medium"
+              >
+                {item.title}
+              </Link>
+            ))}
           </div>
 
           {/* Search Bar */}
@@ -212,30 +230,15 @@ const Navbar = () => {
                          focus:outline-none focus:border-blue-600 transition duration-300
                          text-gray-800 placeholder-gray-500 mb-2 hover:border-blue-400"
               />
-              <Link
-                href="/mens"
-                className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-300"
-              >
-                Men
-              </Link>
-              <Link
-                href="/womens"
-                className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-300"
-              >
-                Women
-              </Link>
-              <Link
-                href="/kids"
-                className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-300"
-              >
-                Kids
-              </Link>
-              <Link
-                href="/new-arrivals"
-                className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-300"
-              >
-                New Arrivals
-              </Link>
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-300"
+                >
+                  {item.title}
+                </Link>
+              ))}
             </div>
           </div>
         )}
