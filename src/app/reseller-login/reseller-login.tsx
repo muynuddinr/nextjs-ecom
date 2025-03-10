@@ -61,16 +61,19 @@ export default function ResellerLogin() {
       }));
     } else if (keys.length === 3) {
       const [parent, child, grandChild] = keys;
-      setFormData(prev => ({
-        ...prev,
-        [parent]: {
-          ...(prev[parent as keyof typeof prev] as object),
-          [child]: {
-            ...((prev[parent as keyof typeof prev] as any)[child]),
-            [grandChild]: value
+      setFormData(prev => {
+        const parentObj = (prev[parent as keyof typeof prev] as unknown) as { [key: string]: { [key: string]: string } };
+        return {
+          ...prev,
+          [parent]: {
+            ...parentObj,
+            [child]: {
+              ...parentObj[child],
+              [grandChild]: value
+            }
           }
-        }
-      }));
+        };
+      });
     }
   };
 

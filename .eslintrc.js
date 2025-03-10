@@ -10,7 +10,7 @@ module.exports = {
         varsIgnorePattern: '^_',
         argsIgnorePattern: '^_'
       }],
-      'no-var': ['error', { 'allowInGlobalScope': true }],
+      'no-var': ['error', { 'allowInGlobalScope': false }],
       '@next/next/no-img-element': 'error'
     },
     parserOptions: {

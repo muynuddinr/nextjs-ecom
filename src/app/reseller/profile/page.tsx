@@ -1,18 +1,28 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaStore, FaCamera, FaMapMarkerAlt, FaBuilding, FaCreditCard, FaIdCard } from 'react-icons/fa';
+import { FaStore, FaEnvelope, FaCamera, FaMapMarkerAlt } from 'react-icons/fa';
 import Image from 'next/image';
 
 interface ResellerData {
+  id: string;
   fullName: string;
   email: string;
   phone: string;
-  photo?: string;
+  address: {
+    street: string;
+    landmark: string;
+    city: string;
+    state: string;
+    pinCode: string;
+  };
+  photo: string;
   storeDetails: {
     storeName: string;
     description: string;
     category: string;
+    openingTime: string;
+    closingTime: string;
     storeAddress: {
       street: string;
       landmark: string;
@@ -21,18 +31,13 @@ interface ResellerData {
       pinCode: string;
     };
   };
-  bankDetails: {
-    accountNumber: string;
-    ifscCode: string;
-    accountHolderName: string;
-    bankName: string;
-  };
+  role: string;
 }
 
 export default function ResellerProfile() {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState<ResellerData | null>(null);
   const [editedData, setEditedData] = useState<ResellerData | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
@@ -170,7 +175,7 @@ export default function ResellerProfile() {
           {/* Personal Information */}
           <div className="space-y-4">
             <h2 className="text-xl font-semibold flex items-center">
-              <FaIdCard className="mr-2" /> Personal Information
+              <FaEnvelope className="mr-2" /> Personal Information
             </h2>
             <div className="space-y-4">
               <div>
@@ -296,59 +301,6 @@ export default function ResellerProfile() {
                   type="text"
                   name="storeDetails.storeAddress.pinCode"
                   value={editedData.storeDetails?.storeAddress?.pinCode}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Bank Details */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold flex items-center">
-              <FaCreditCard className="mr-2" /> Bank Details
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Account Number</label>
-                <input
-                  type="text"
-                  name="bankDetails.accountNumber"
-                  value={editedData.bankDetails?.accountNumber}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">IFSC Code</label>
-                <input
-                  type="text"
-                  name="bankDetails.ifscCode"
-                  value={editedData.bankDetails?.ifscCode}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Account Holder Name</label>
-                <input
-                  type="text"
-                  name="bankDetails.accountHolderName"
-                  value={editedData.bankDetails?.accountHolderName}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Bank Name</label>
-                <input
-                  type="text"
-                  name="bankDetails.bankName"
-                  value={editedData.bankDetails?.bankName}
                   onChange={handleInputChange}
                   disabled={!isEditing}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
