@@ -32,13 +32,13 @@ const Banner = () => {
 
   const featuredCategories = [
     { 
-      name: 'Men', 
+      name: 'Mens', 
       image: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=1974',
       link: '/mens',
       description: 'Stylish menswear collection'
     },
     { 
-      name: 'Women', 
+      name: 'Womens', 
       image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2070',
       link: '/womens',
       description: 'Elegant womenswear designs'
