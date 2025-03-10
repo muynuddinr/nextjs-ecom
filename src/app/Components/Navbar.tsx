@@ -112,8 +112,8 @@ const Navbar = () => {
                 <div className="w-10 h-10 rounded-full overflow-hidden">
                   {user?.photo ? (
                     <Image 
-                      src={user.photo} 
-                      alt={user.fullName}
+                      src={user.photo || '/default-avatar.png'}
+                      alt={`${user?.fullName || 'User'}'s profile picture`}
                       width={40}
                       height={40}
                       className="w-full h-full object-cover"
@@ -138,7 +138,7 @@ const Navbar = () => {
                         <div className="w-12 h-12 rounded-full overflow-hidden mr-3">
                           <Image 
                             src={user.photo} 
-                            alt={user.fullName}
+                            alt={`${user?.fullName || 'User'}'s profile picture`}
                             width={48}
                             height={48}
                             className="w-full h-full object-cover"
